@@ -3,7 +3,7 @@ on:
   pull_request :
 jobs:
   build:
-    runs-on: self-hosted # 適宜自分の環境に合わせる
+    runs-on: macos-latest # 適宜自分の環境に合わせる
     steps:
     - uses: actions/checkout@v2
       with: 
