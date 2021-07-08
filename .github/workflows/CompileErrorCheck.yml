@@ -1,0 +1,33 @@
+name: CheckCompileError
+on:
+  pull_request :
+jobs:
+  build:
+    runs-on: self-hosted # 適宜自分の環境に合わせる
+    steps:
+    - uses: actions/checkout@v2
+      with: 
+        clean : false
+        # falseにしないと毎回毎回プロジェクト初期化されるので流石に重い 
+        lfs : false
+        # 使ってないならOFFにする
+
+    - name: open unity
+      env: 
+        UNITY_PATH: "UnityのPath"
+      run: $UNITY_PATH -quit -batchmode  -projectPath $GITHUB_WORKSPACE
+    - name: Post Comment GitHub PullRequest Page
+      if: failure()
+      # 失敗したときのみ実行される
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PULL_REQ_URL: ${{ github.event.pull_request.comments_url }}
+        COMMIT : "commit"
+        SHA: ${{ github.sha }}
+        ACTOR: ${{github.actor}}
+        TEXT: "コンパイルエラーが出てます"
+      run: |
+        curl -X POST \
+             -H "Authorization: token ${GITHUB_TOKEN}" \
+             -d "{\"body\": \"@${ACTOR} ${TEXT}　${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/${COMMIT}/${SHA} \"}" \
+             ${PULL_REQ_URL}
